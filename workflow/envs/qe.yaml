@@ -1,0 +1,9 @@
+name: pyteck
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  - pandas
+  - ase
+  - matplotlib
+

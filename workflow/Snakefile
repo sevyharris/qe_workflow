@@ -1,0 +1,27 @@
+# comment
+
+rule calc_bulk:
+    # Rule to compute the bulk constant
+    input:
+        "scripts/bulk/relax_bulk.py"              
+    output:
+        "../results/bulk/espresso.pwo"
+    conda:
+        "envs/qe.yaml"
+    shell:
+        """
+        mydir=$(pwd)
+        mkdir -p ../results/bulk
+        cp {input} ../results/bulk
+        cp scripts/bulk/run_bulk.sh ../results/bulk
+        cd ../results/bulk
+        sbatch run_bulk.sh
+        cd $mydir
+        """
+        # "sbatch scripts/run_bulk.sh"
+#rule relax_slab:
+#    inputs:
+#    outputs:
+
+
+
