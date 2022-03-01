@@ -1,0 +1,14 @@
+# Some properties that probably belong here:
+# adsorbate vacuum size
+# system/slab vacuum size
+# force and pressure convergence thresholds
+# ecutwfc
+# ecutwfc for the bulk constant
+# kpts bulk constant
+# kpts adsorbate
+# kpts slab
+# kpts system -- should these things be the same?
+#
+#
+
+

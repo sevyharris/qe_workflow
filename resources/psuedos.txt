@@ -1,0 +1,5 @@
+# The psuedopotential files should probably go in the repository,
+but they're kind of big, so for now, I'll just include a link to
+where I got them from:
+http://quantum-simulation.org/potentials/sg15_oncv/sg15_oncv_upf_2020-02-06.tar.gz
+
