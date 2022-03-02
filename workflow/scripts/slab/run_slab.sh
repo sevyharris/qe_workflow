@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=Cu_bulk
+#SBATCH --job-name=Cu_slab
 #SBATCH --error=pw.error
 #SBATCH --nodes=1
 #SBATCH --partition=short

@@ -18,8 +18,7 @@ logfile = 'ase.log'
 
 
 # read in the results from the previous bulk cell relaxation
-script_dir = os.path.dirname(__file__)
-bulk_file = os.path.join(script_dir, '..', '..', '..', 'results', 'bulk', 'espresso.pwo')
+bulk_file = 'bulk.pwo'
 with open(bulk_file, 'r') as f:
     traj = list(read_espresso_out(f, index=slice(None)))
     lattice_constant = traj[-1].cell[0][0]

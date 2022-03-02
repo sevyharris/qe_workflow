@@ -43,15 +43,19 @@ rule relax_slab:
         rules.calc_bulk.output[0],
         slab_script
     output:
-        "../results/slab/espresso.pwo"
+        "../results/slab/espresso.pwo",
+        "../results/slab/slab.pwo"
+    conda:
+        "envs/qe.yaml"
     shell:
         """
         mydir=$(pwd)
         mkdir -p ../results/slab
-        cp {input} ../results/slab
+        cp {rules.calc_bulk.output[1]} ../results/slab
+        cp {input[1]} ../results/slab
         cp scripts/slab/run_slab.sh ../results/slab
         cd ../results/slab
-        sbatch run_bulk.sh
+        sbatch run_slab.sh
         """
 
 rule name_files:
