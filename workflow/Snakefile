@@ -1,11 +1,30 @@
 # comment
 
+
+bulk_script = "scripts/bulk/relax_bulk.py"
+slab_script = "scripts/slab/relax_slab.py"
+adsorbate_script = "scripts/adsorbate/relax_adsorbate.py"
+
+
+#rule load_dft_settings:
+#    # TODO actually write this, or determine once and for all that it's a waste of time
+#    # Script to copy DFT settings from config into the python scripts
+#    input:
+#        "../config/config.yaml"
+#    output:
+#        bulk_script,
+#        slab_script,
+#        adsorbate_script,
+#    shell:
+#        "echo hello"
+
 rule calc_bulk:
     # Rule to compute the bulk constant
     input:
-        "scripts/bulk/relax_bulk.py"              
+        bulk_script
     output:
-        "../results/bulk/espresso.pwo"
+        "../results/bulk/espresso.pwo",
+        "../results/bulk/bulk.pwo"
     conda:
         "envs/qe.yaml"
     shell:
@@ -18,10 +37,28 @@ rule calc_bulk:
         sbatch run_bulk.sh
         cd $mydir
         """
-        # "sbatch scripts/run_bulk.sh"
-#rule relax_slab:
-#    inputs:
-#    outputs:
 
+rule relax_slab:
+    input:
+        rules.calc_bulk.output[0],
+        slab_script
+    output:
+        "../results/slab/espresso.pwo"
+    shell:
+        """
+        mydir=$(pwd)
+        mkdir -p ../results/slab
+        cp {input} ../results/slab
+        cp scripts/slab/run_slab.sh ../results/slab
+        cd ../results/slab
+        sbatch run_bulk.sh
+        """
+
+rule name_files:
+    input:
+        bulk_script
+    run:
+        print(input)
+        print(rules.calc_bulk.output)
 
 
