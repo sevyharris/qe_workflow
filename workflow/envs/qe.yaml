@@ -1,9 +1,11 @@
-name: pyteck
+name: ase_qe
 channels:
   - conda-forge
+  - sharris7
 dependencies:
   - numpy
   - pandas
   - ase
   - matplotlib
+  - sharris7::job_manager
 
