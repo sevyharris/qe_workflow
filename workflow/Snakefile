@@ -1,39 +1,33 @@
 # comment
+import os
 
+bulk_dir = "../results/bulk"
+slab_dir = "../results/slab"
+adsorbate_dir = "../results/adsorbate"
 
-bulk_script = "scripts/bulk/relax_bulk.py"
-slab_script = "scripts/slab/relax_slab.py"
-adsorbate_script = "scripts/adsorbate/relax_adsorbate.py"
+bulk_script = "scripts/relax_bulk.py"
+slab_script = "scripts/relax_slab.py"
+adsorbate_script = "scripts/relax_adsorbate.py"
+run_bulk_script = "scripts/run_bulk.sh"
+run_slab_script = "scripts/run_slab.sh"
+run_adsorbate_script = "scripts/run_adsorbate.sh"
 
-
-#rule load_dft_settings:
-#    # TODO actually write this, or determine once and for all that it's a waste of time
-#    # Script to copy DFT settings from config into the python scripts
-#    input:
-#        "../config/config.yaml"
-#    output:
-#        bulk_script,
-#        slab_script,
-#        adsorbate_script,
-#    shell:
-#        "echo hello"
 
 rule calc_bulk:
     # Rule to compute the bulk constant
     input:
         bulk_script
     output:
-        "../results/bulk/espresso.pwo",
         "../results/bulk/bulk.pwo"
     conda:
         "envs/qe.yaml"
     shell:
         """
         mydir=$(pwd)
-        mkdir -p ../results/bulk
-        cp {input} ../results/bulk
-        cp scripts/bulk/run_bulk.sh ../results/bulk
-        cd ../results/bulk
+        mkdir -p {bulk_dir}
+        cp {input} {bulk_dir}
+        cp {run_bulk_script} {bulk_dir}
+        cd {bulk_dir}
         sbatch run_bulk.sh
         cd $mydir
         """
@@ -43,20 +37,43 @@ rule relax_slab:
         rules.calc_bulk.output[0],
         slab_script
     output:
-        "../results/slab/espresso.pwo",
         "../results/slab/slab.pwo"
     conda:
         "envs/qe.yaml"
     shell:
         """
         mydir=$(pwd)
-        mkdir -p ../results/slab
-        cp {rules.calc_bulk.output[1]} ../results/slab
-        cp {input[1]} ../results/slab
-        cp scripts/slab/run_slab.sh ../results/slab
-        cd ../results/slab
+        mkdir -p {slab_dir}
+        cp {rules.calc_bulk.output[0]} {slab_dir}
+        cp {input[1]} {slab_dir}
+        cp {run_slab_script} {slab_dir}
+        cd {slab_dir}
         sbatch run_slab.sh
+        cd $mydir
         """
+
+adsorbate = "CO2"
+adsorbate_xyz = os.path.join('..', 'resources', 'adsorbates', adsorbate + '.xyz')
+one_ads_dir = os.path.join(adsorbate_dir, adsorbate)
+rule relax_adsorbate:
+    input:
+        adsorbate_xyz
+    shell:
+        """
+        mydir=$(pwd)
+        mkdir -p {one_ads_dir}
+        cp {adsorbate_xyz} {one_ads_dir}
+        cp {adsorbate_script} {one_ads_dir}
+        cp {run_ads_script} {one_ads_dir}
+        cd {one_ads_dir}
+        sbatch run_slab.sh
+        cd $mydir
+        """
+
+rule relax_all_adsorbates:
+    shell:
+        "echo hello"
+
 
 rule name_files:
     input:
