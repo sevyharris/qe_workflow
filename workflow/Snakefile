@@ -124,6 +124,32 @@ rule coarse_system:
         cd $mydir
         """
 
+fine_system_dir = os.path.join(system_dir, system_str)
+fine_system_script = os.path.join('scripts', 'fine_system.py')
+run_fine_system = os.path.join('scripts', 'run_system.sh')
+rule fine_system:
+    """Rule to optimize geometry of adsorbate on slab
+    """
+    input:
+        adsorbate_pwo,
+        slab_pwo,
+        fine_system_script,
+    output:
+        os.path.join(fine_system_dir, 'espresso.pwo')
+    conda:
+        "envs/qe.yaml"
+    shell:
+        """
+        mydir=$(pwd)
+        mkdir -p {fine_system_dir}
+        cp {fine_system_script} {fine_system_dir}
+        cp {run_fine_system} {fine_system_dir}
+        cp {adsorbate_pwo} {fine_system_dir}/adsorbate.pwo
+        cp {slab_pwo} {fine_system_dir}
+        cd {fine_system_dir}
+        sbatch run_system.sh
+        cd $mydir
+        """
 
 # TODO implement this
 rule relax_all_adsorbates:
