@@ -27,6 +27,7 @@ def place_adsorbate_top(metal_slab, adsorbate, height=1.0, ads_index=0):
             pos_difference = ads_origin - adsorbate.get_positions()[ads_index]
             adsorbate.translate(pos_difference)
             metal_slab += adsorbate
+            print(f'Using {adsorbate[ads_index]} for binding atom')
             return
     print("Failed to place adsorbate")
     exit(-1)
@@ -52,7 +53,7 @@ bottom_layer_z = np.min([pos[2] for pos in metal_slab.get_positions()])
 bottom_layer = []
 for i, pos in enumerate(metal_slab.get_positions()):
     if pos[2] == bottom_layer_z:
-        print(metal_slab[i])
+        # print(metal_slab[i])
         bottom_layer.append(metal_slab[i].index)
 
 fix_bottom_layer = FixAtoms(indices=bottom_layer)
@@ -65,10 +66,11 @@ bond_atom_index = -1
 for element in element_priority:
     for atom in adsorbate:
         if atom.symbol == element:
-            bond_atom = atom.index
+            bond_atom_index = atom.index
             break
     if bond_atom_index > -1:
         break
+print(f'bond atom is {adsorbate[bond_atom_index]}')
 
 # 'ontop', 'bridge', 'fcc', 'hcp'
 # https://wiki.fysik.dtu.dk/ase/ase/build/surface.html#ase.build.add_adsorbate
@@ -100,8 +102,9 @@ pseudopotentials = {
 }
 
 pw_executable = os.environ['PW_EXECUTABLE']
+command = f'mpirun -np 16 {pw_executable} -in PREFIX.pwi > PREFIX.pwo'
 calc = Espresso(
-    command=f'{pw_executable} -in PREFIX.pwi > PREFIX.pwo',
+    command=command,
     pseudopotentials=pseudopotentials,
     tstress=True,
     tprnfor=True,

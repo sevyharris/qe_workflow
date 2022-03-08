@@ -46,8 +46,13 @@ with open(job_file, 'w') as f:
     f.write('#SBATCH --time=24:00:00\n')
     f.write('#SBATCH --job-name=ads_height\n')
     f.write('#SBATCH --mem=40Gb\n')
+    f.write('#SBATCH --cpus-per-task=1\n')
+    f.write('#SBATCH --ntasks=16\n')
     f.write('#SBATCH --partition=short,west\n')
     f.write(f'#SBATCH --array=0-{N - 1}\n\n')
+    f.write('module load gcc/10.1.0\n')
+    f.write('module load openmpi/4.0.5-skylake-gcc10.1\n')
+    f.write('module load scalapack/2.1.0-skylake\n\n')
     f.write(f'cd {run_i_dir}\n')
     f.write(f'python calc.py\n')
 
