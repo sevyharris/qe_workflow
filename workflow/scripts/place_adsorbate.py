@@ -3,6 +3,7 @@
 import sys
 import os
 from shutil import copyfile
+import numpy as np
 from ase.build import bulk, fcc111, add_adsorbate
 from ase.io import read, write
 from ase import Atoms
@@ -15,12 +16,27 @@ from ase.io.ulm import InvalidULMFileError
 from time import time
 
 
+def place_adsorbate_top(metal_slab, adsorbate, height=1.0, ads_index=0):
+    # remove the adsorbate cell
+    adsorbate.cell = [0, 0, 0]
+    top_layer_z = np.max([pos[2] for pos in metal_slab.get_positions()])
+    for i, pos in enumerate(metal_slab.get_positions()):
+        if pos[2] == top_layer_z:
+            # place the atom height above here
+            ads_origin = pos + [0, 0, height]
+            pos_difference = ads_origin - adsorbate.get_positions()[ads_index]
+            adsorbate.translate(pos_difference)
+            metal_slab += adsorbate
+            return
+    print("Failed to place adsorbate")
+    exit(-1)
+
 start = time()
 
 logfile = 'ase.log'
 
 slab_file = '../slab.pwo'
-with open(bulk_file, 'r') as f:
+with open(slab_file, 'r') as f:
     traj = list(read_espresso_out(f, index=slice(None)))
 metal_slab = traj[-1]
 
@@ -56,7 +72,9 @@ for element in element_priority:
 
 # 'ontop', 'bridge', 'fcc', 'hcp'
 # https://wiki.fysik.dtu.dk/ase/ase/build/surface.html#ase.build.add_adsorbate
-add_adsorbate(metal_slab, adsorbate, height=height, position='ontop', mol_index=bond_atom_index)
+# add_adsorbate(metal_slab, adsorbate, height=height, position='ontop', mol_index=bond_atom_index)
+# can't use the add_adsorbate function if you load the atoms from a pwo file... 
+place_adsorbate_top(metal_slab, adsorbate, height=height, ads_index=bond_atom_index)
 
 write(f'initial_system.xyz', metal_slab)
 

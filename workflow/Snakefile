@@ -116,11 +116,11 @@ rule coarse_system:
         """
         mydir=$(pwd)
         mkdir -p {coarse_system_dir}
-        cp {adsorbate_pwo} {coarse_system_dir}/{system_ads}.pwo
+        cp {adsorbate_pwo} {coarse_system_dir}/adsorbate.pwo
         cp {slab_pwo} {coarse_system_dir}
         python {coarse_system_script} {coarse_system_dir}
         cd {coarse_system_dir}
-        # sbatch run_qe_jobs.sh
+        sbatch run_qe_jobs.sh
         cd $mydir
         """
 
