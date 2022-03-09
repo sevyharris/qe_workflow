@@ -16,7 +16,7 @@ run_slab_script = "scripts/run_slab.sh"
 run_adsorbate_script = "scripts/run_adsorbate.sh"
 run_place_system_script = "scripts/run_place_system.sh"
 
-
+metal = 'Cu'
 rule calc_bulk:
     # Rule to compute the bulk constant
     input:
@@ -32,7 +32,7 @@ rule calc_bulk:
         cp {input} {bulk_dir}
         cp {run_bulk_script} {bulk_dir}
         cd {bulk_dir}
-        sbatch run_bulk.sh
+        sbatch --job-name={metal}_bulk run_bulk.sh
         cd $mydir
         """
 
@@ -52,7 +52,7 @@ rule relax_slab:
         cp {input[1]} {slab_dir}
         cp {run_slab_script} {slab_dir}
         cd {slab_dir}
-        sbatch run_slab.sh
+        sbatch --job-name={metal}_slab run_slab.sh
         cd $mydir
         """
 
@@ -86,13 +86,23 @@ rule relax_adsorbate:
         cp {adsorbate_script} {one_ads_dir}
         cp {run_adsorbate_script} {one_ads_dir}
         cd {one_ads_dir}
-        sbatch run_adsorbate.sh
+        sbatch --job-name={adsorbate}_ads run_adsorbate.sh
         cd $mydir
         """
 
 
 system_metal = "Cu111"
-system_ads = "CO2"
+# system_ads = "CO2"
+# system_ads = "CO"
+# system_ads = "CH4"
+# system_ads = "OH"
+# system_ads = "O2"
+# system_ads = "O"
+# system_ads = "H2"
+# system_ads = "H2O"
+# system_ads = "C2H4"
+# system_ads = "N2"
+system_ads = "H"
 system_site = "top"
 system_str = '_'.join([system_metal, system_ads, system_site])
 coarse_system_dir = os.path.join(system_dir, system_str + '_coarse')
@@ -120,7 +130,7 @@ rule coarse_system:
         cp {slab_pwo} {coarse_system_dir}
         python {coarse_system_script} {coarse_system_dir}
         cd {coarse_system_dir}
-        sbatch run_qe_jobs.sh
+        sbatch --job-name={system_ads}_system_coarse run_qe_jobs.sh
         cd $mydir
         """
 
@@ -147,7 +157,7 @@ rule fine_system:
         cp {adsorbate_pwo} {fine_system_dir}/adsorbate.pwo
         cp {slab_pwo} {fine_system_dir}
         cd {fine_system_dir}
-        sbatch run_system.sh
+        sbatch --job-name={system_ads}_system run_system.sh
         cd $mydir
         """
 
