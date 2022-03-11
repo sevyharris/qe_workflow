@@ -8,6 +8,7 @@ system_dir = "../results/system"
 
 bulk_script = "scripts/bulk/relax_bulk.py"
 lattice_constant_script = "scripts/bulk/lattice_constant.py"
+
 slab_script = "scripts/relax_slab.py"
 adsorbate_script = "scripts/relax_adsorbate.py"
 coarse_system_script = "scripts/place_system.py"
@@ -38,26 +39,27 @@ rule calc_bulk_vc_relax:
         cd $mydir
         """
 
-rule calc_bulk:
-    # Rule to use an equation of state to calculate the bulk constant
+make_lattice_converge_script = "scripts/bulk/make_lattice_convergence.py"
+lattice_ecut_dir = os.path.join(bulk_dir, 'ecutwfc')
+rule ecut_bulk_lattice:
+    # Rule to use an equation of state with ecutwfc to check bulk lattice constant convergence
     input:
-        lattice_constant_script
+        make_lattice_converge_script
     conda:
         "envs/qe.yaml"
     shell:
         """
         mydir=$(pwd)
-        mkdir -p {bulk_dir}
-        cp {input} {bulk_dir}
-        cp {run_bulk_script} {bulk_dir}
-        cd {bulk_dir}
-        sbatch --job-name={metal}_bulk run_bulk.sh
+        mkdir -p {lattice_ecut_dir}
+        python {make_lattice_converge_script} {lattice_ecut_dir}
+        cd {lattice_ecut_dir}
+        sbatch --job-name={metal}_ecut_bulk run_qe_jobs.sh
         cd $mydir
         """
 
 rule relax_slab:
     input:
-        rules.calc_bulk.output[0],
+        rules.calc_bulk_vc_relax.output[0],
         slab_script
     output:
         "../results/slab/slab.pwo"
@@ -67,7 +69,7 @@ rule relax_slab:
         """
         mydir=$(pwd)
         mkdir -p {slab_dir}
-        cp {rules.calc_bulk.output[0]} {slab_dir}
+        cp {rules.calc_bulk_vc_relax.output[0]} {slab_dir}
         cp {input[1]} {slab_dir}
         cp {run_slab_script} {slab_dir}
         cd {slab_dir}
@@ -191,6 +193,6 @@ rule name_files:
         bulk_script
     run:
         print(input)
-        print(rules.calc_bulk.output)
+        print(rules.calc_bulk_vc_relax.output)
 
 
