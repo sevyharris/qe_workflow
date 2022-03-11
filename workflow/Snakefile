@@ -6,23 +6,42 @@ slab_dir = "../results/slab"
 adsorbate_dir = "../results/adsorbate"
 system_dir = "../results/system"
 
-bulk_script = "scripts/relax_bulk.py"
+bulk_script = "scripts/bulk/relax_bulk.py"
+lattice_constant_script = "scripts/bulk/lattice_constant.py"
 slab_script = "scripts/relax_slab.py"
 adsorbate_script = "scripts/relax_adsorbate.py"
 coarse_system_script = "scripts/place_system.py"
 # system_script = "scripts/relax_system.py"
-run_bulk_script = "scripts/run_bulk.sh"
-run_slab_script = "scripts/run_slab.sh"
+run_bulk_script = "scripts/bulk/run_bulk.sh"
+run_slab_script = "scripts/bulk/run_slab.sh"
 run_adsorbate_script = "scripts/run_adsorbate.sh"
 run_place_system_script = "scripts/run_place_system.sh"
 
 metal = 'Cu'
-rule calc_bulk:
-    # Rule to compute the bulk constant
+rule calc_bulk_vc_relax:
+    # Rule to compute the bulk constant using vc-relax
+    # Subject to Pulay forces, so make sure you use a very high ecutwfc
     input:
         bulk_script
     output:
         "../results/bulk/bulk.pwo"
+    conda:
+        "envs/qe.yaml"
+    shell:
+        """
+        mydir=$(pwd)
+        mkdir -p {bulk_dir}
+        cp {input} {bulk_dir}
+        cp {run_bulk_script} {bulk_dir}
+        cd {bulk_dir}
+        sbatch --job-name={metal}_bulk run_bulk.sh
+        cd $mydir
+        """
+
+rule calc_bulk:
+    # Rule to use an equation of state to calculate the bulk constant
+    input:
+        lattice_constant_script
     conda:
         "envs/qe.yaml"
     shell:
