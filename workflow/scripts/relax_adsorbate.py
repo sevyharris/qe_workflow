@@ -62,13 +62,24 @@ espresso_settings = {
 # port = int(seed % (max_port - min_port) + min_port)
 
 pw_executable = os.environ['PW_EXECUTABLE']
-pseudopotentials = {
-    'C': 'C.pbe-n-kjpaw_psl.1.0.0.UPF',
-    'Cu': 'Cu.pbe-dn-kjpaw_psl.1.0.0.UPF',
-    'O': 'O.pbe-n-kjpaw_psl.1.0.0.UPF',
-    'N': 'N.pbe-n-kjpaw_psl.1.0.0.UPF',
-    'H': 'H.pbe-kjpaw_psl.1.0.0.UPF',
-}
+
+use_oncv = True
+if use_oncv:
+    pseudopotentials = {
+        'C': 'C_ONCV_PBE-1.2.upf',
+        'Cu': 'Cu_ONCV_PBE-1.2.upf',
+        'O': 'O_ONCV_PBE-1.2.upf',
+        'N': 'N_ONCV_PBE-1.2.upf',
+        'H': 'H_ONCV_PBE-1.2.upf',
+    }
+else:
+    pseudopotentials = {
+        'C': 'C.pbe-n-kjpaw_psl.1.0.0.UPF',
+        'Cu': 'Cu.pbe-dn-kjpaw_psl.1.0.0.UPF',
+        'O': 'O.pbe-n-kjpaw_psl.1.0.0.UPF',
+        'N': 'N.pbe-n-kjpaw_psl.1.0.0.UPF',
+        'H': 'H.pbe-kjpaw_psl.1.0.0.UPF',
+    }
 
 # Restart if available
 traj_file = 'ads.traj'
@@ -83,7 +94,7 @@ if os.path.exists(traj_file):
 
 
 #aprun -n 4 -N 1 pw.x -nk 4 --ipi {host}:{port} --in PREFIX.pwi > PREFIX.out
-command = f'mpirun -n 4 {pw_executable} -in PREFIX.pwi > PREFIX.pwo'
+command = f'mpirun -np 16 {pw_executable} -in PREFIX.pwi > PREFIX.pwo'
 #command = f'aprun -n 16 {pw_executable} -in PREFIX.pwi --ipi {hostname}:{port} -nk 4 > PREFIX.pwo'
 print(command)
 espresso = Espresso(
@@ -91,7 +102,7 @@ espresso = Espresso(
     pseudopotentials=pseudopotentials,
     tstress=True,
     tprnfor=True,
-    kpts=None,
+    kpts=(1, 1, 1),
     pseudo_dir=os.environ['PSEUDO_DIR'],
     #pseudo_dir='/home/harris.se/espresso/pseudos/',
     #pseudo_dir='/home/sevy/espresso/pseudos/',

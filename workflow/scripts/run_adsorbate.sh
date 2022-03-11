@@ -4,7 +4,7 @@
 #SBATCH --partition=short
 #SBATCH --mem=0
 #SBATCH --time=24:00:00
-#SBATCH --mincpus=4
+#SBATCH --mincpus=16
 #SBATCH --constraint=cascadelake
 
 
