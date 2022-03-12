@@ -1,31 +1,43 @@
+# Script to set up energy and run an energy calculation in ase/quantum espresso
 import os
 import sys
 
 import numpy as np
 
 
-BASE_DIR = sys.argv[1]
-# BASE_DIR = '/work/westgroup/harris.se/espresso/qe_workflow/results/bulk/'
-
-# Try one parameter at a time
-# ecuts = np.logspace(1, 3.5, 11)  # 10 - 3163 
-# kpts = [k for k in range(1, 22)] 
-# smearing = [0.5, 0.4, 0.3, 0.2, 0.1, 0.05]
-
-ecuts = [40.0, 60.0, 80.0, 100.0, 200.0, 400.0, 600.0, 800.0, 1000.0, 1200.0, 1400.0, 1600.0, 1800.0, 2000.0, 3000.0]
-#ecuts = np.logspace(1, 3.5, 11)  # 10 - 3163 
-kpts = [9]
-smearing = [0.1]
+def setup_energy_calc(CALC_DIR, lattice_constant, array_job=False):
+    os.makedirs(CALC_DIR, exist_ok=True)
+    make_scf_calc_file(CALC_DIR, lattice_constant, ecutwfc=1000, kpt=9, smear=0.1, nproc=16)
+    if not array_job:
+        make_scf_run_file(CALC_DIR)
 
 
-def make_scf_run_file(dest_dir, N_runs):
+def make_scf_run_file(calc_dir, nproc=16):
+    bash_filename = os.path.join(calc_dir, 'run.sh')
+    # write the array job file
+    with open(bash_filename, 'w') as f:
+        f.write('#!/bin/bash\n\n')
+        f.write('#SBATCH --time=24:00:00\n')
+        f.write('#SBATCH --job-name=bulk_energy\n')
+        f.write('#SBATCH --mem=40Gb\n')
+        f.write('#SBATCH --cpus-per-task=1\n')
+        f.write(f'#SBATCH --ntasks={nproc}\n')
+        f.write('#SBATCH --partition=short,west\n')
+        f.write('module load gcc/10.1.0\n')
+        f.write('module load openmpi/4.0.5-skylake-gcc10.1\n')
+        f.write('module load scalapack/2.1.0-skylake\n\n')
+        f.write(f'cd {calc_dir}\n')
+        f.write(f'python calc.py\n')
+
+
+def make_scf_run_file_array(dest_dir, N_runs):
     bash_filename = os.path.join(dest_dir, 'run_qe_jobs.sh')
     run_i_dir = os.path.abspath(os.path.join(dest_dir, 'run$SLURM_ARRAY_TASK_ID'))
     # write the array job file
     with open(bash_filename, 'w') as f:
         f.write('#!/bin/bash\n\n')
         f.write('#SBATCH --time=24:00:00\n')
-        f.write('#SBATCH --job-name=lattice_converge\n')
+        f.write('#SBATCH --job-name=bulk_energy\n')
         f.write('#SBATCH --mem=40Gb\n')
         f.write('#SBATCH --cpus-per-task=1\n')
         f.write('#SBATCH --ntasks=16\n')
@@ -37,7 +49,7 @@ def make_scf_run_file(dest_dir, N_runs):
         f.write(f'cd {run_i_dir}\n')
         f.write(f'python calc.py\n')
 
-def make_scf_calc_file(ecutwfc, kpt, smear, calc_dir):
+def make_scf_calc_file(calc_dir, lattice_constant, ecutwfc=1000, kpt=9, smear=0.1, nproc=16):
 
     python_file_lines = [
         "import os",
@@ -66,7 +78,7 @@ def make_scf_calc_file(ecutwfc, kpt, smear, calc_dir):
         "}",
         "",
         "",
-        "cu_bulk = bulk('Cu', crystalstructure='fcc', a=3.6, cubic=True)",
+        f"cu_bulk = bulk('Cu', crystalstructure='fcc', a={lattice_constant}, cubic=True)",
         "",
         "pw_executable = os.environ['PW_EXECUTABLE']",
         "",
@@ -78,7 +90,7 @@ def make_scf_calc_file(ecutwfc, kpt, smear, calc_dir):
         "    'H': 'H_ONCV_PBE-1.2.upf',",
         "}",
         "",
-        "command = f'mpirun -np 16 {pw_executable} -in PREFIX.pwi > PREFIX.pwo'",
+        f"command = f'mpirun -np {nproc} " + "{pw_executable} -in PREFIX.pwi > PREFIX.pwo'",
         "print(command)",
         "",
         "espresso = Espresso(",
@@ -107,15 +119,3 @@ def make_scf_calc_file(ecutwfc, kpt, smear, calc_dir):
     calc_filename = os.path.join(calc_dir, f'calc.py')
     with open(calc_filename, 'w') as f:
         f.writelines([line + '\n' for line in python_file_lines])
-
-i = 0
-for ecutwfc in ecuts:
-    for kpt in kpts:
-        for smear in smearing:
-            calc_dir = os.path.join(BASE_DIR, f'run{i}')
-            os.makedirs(calc_dir, exist_ok=True)
-            make_scf_calc_file(ecutwfc, kpt, smear, calc_dir)
-            i += 1
-
-
-make_scf_run_file(BASE_DIR, i)
