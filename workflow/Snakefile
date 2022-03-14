@@ -109,143 +109,22 @@ rule relax_adsorbate:
         conda deactivate'
         """
 
+lattice_constant_estimate = ''  # set to a value, like 3.6 to skip eos_fine
+rule relax_slab:
+    """Rule to optimize a metal slab
 
-# slab_script = "scripts/relax_slab.py"
-# adsorbate_script = "scripts/relax_adsorbate.py"
-# coarse_system_script = "scripts/place_system.py"
-# # system_script = "scripts/relax_system.py"
-# run_bulk_script = "scripts/bulk/run_bulk.sh"
-# run_slab_script = "scripts/bulk/run_slab.sh"
-# run_adsorbate_script = "scripts/run_adsorbate.sh"
-# run_place_system_script = "scripts/run_place_system.sh"
-
-# metal = 'Cu'
-# rule calc_bulk_vc_relax:
-#     # Rule to compute the bulk constant using vc-relax
-#     # Subject to Pulay forces, so make sure you use a very high ecutwfc
-#     input:
-#         bulk_script
-#     output:
-#         "../results/bulk/bulk.pwo"
-#     conda:
-#         "envs/qe.yaml"
-#     shell:
-#         """
-#         mydir=$(pwd)
-#         mkdir -p {bulk_dir}
-#         cp {input} {bulk_dir}
-#         cp {run_bulk_script} {bulk_dir}
-#         cd {bulk_dir}
-#         sbatch --job-name={metal}_bulk run_bulk.sh
-#         cd $mydir
-#         """
-
-# make_lattice_converge_script = "scripts/bulk/make_lattice_convergence.py"
-# lattice_ecut_dir = os.path.join(bulk_dir, 'ecutwfc')
-# rule ecut_bulk_lattice:
-#     # Rule to use an equation of state with ecutwfc to check bulk lattice constant convergence
-#     input:
-#         make_lattice_converge_script
-#     conda:
-#         "envs/qe.yaml"
-#     shell:
-#         """
-#         mydir=$(pwd)
-#         mkdir -p {lattice_ecut_dir}
-#         python {make_lattice_converge_script} {lattice_ecut_dir}
-#         cd {lattice_ecut_dir}
-#         sbatch --job-name={metal}_ecut_bulk run_qe_jobs.sh
-#         cd $mydir
-#         """
-
-
-# rule relax_slab:
-#     input:
-#         rules.calc_bulk_vc_relax.output[0],
-#         slab_script
-#     output:
-#         "../results/slab/slab.pwo"
-#     conda:
-#         "envs/qe.yaml"
-#     shell:
-#         """
-#         mydir=$(pwd)
-#         mkdir -p {slab_dir}
-#         cp {rules.calc_bulk_vc_relax.output[0]} {slab_dir}
-#         cp {input[1]} {slab_dir}
-#         cp {run_slab_script} {slab_dir}
-#         cd {slab_dir}
-#         sbatch --job-name={metal}_slab run_slab.sh
-#         cd $mydir
-#         """
-
-
-# system_metal = "Cu111"
-# # system_ads = "CO2"
-# # system_ads = "CO"
-# # system_ads = "CH4"
-# # system_ads = "OH"
-# # system_ads = "O2"
-# # system_ads = "O"
-# # system_ads = "H2"
-# # system_ads = "H2O"
-# # system_ads = "C2H4"
-# # system_ads = "N2"
-# system_ads = "H"
-# system_site = "top"
-# system_str = '_'.join([system_metal, system_ads, system_site])
-# coarse_system_dir = os.path.join(system_dir, system_str + '_coarse')
-# adsorbate_pwo = os.path.join('..', 'results', 'adsorbate', system_ads, 'espresso.pwo')
-# slab_pwo = os.path.join('..', 'resources', 'slab.pwo')
-# # slab_pwo = os.path.join('..', 'results', 'slab', 'slab.pwo')
-# coarse_system_script = os.path.join('scripts', 'make_ads_height.py')
-# rule coarse_system:
-#     """Rule to place an adsorbate on a metal slab and run several energy jobs
-#     at multiple heights
-#     """
-#     input:
-#         adsorbate_pwo,
-#         slab_pwo,
-#         coarse_system_script,
-#     output:
-#         os.path.join(coarse_system_dir, 'espresso.pwo')
-#     conda:
-#         "envs/qe.yaml"
-#     shell:
-#         """
-#         mydir=$(pwd)
-#         mkdir -p {coarse_system_dir}
-#         cp {adsorbate_pwo} {coarse_system_dir}/adsorbate.pwo
-#         cp {slab_pwo} {coarse_system_dir}
-#         python {coarse_system_script} {coarse_system_dir}
-#         cd {coarse_system_dir}
-#         sbatch --job-name={system_ads}_system_coarse run_qe_jobs.sh
-#         cd $mydir
-#         """
-
-# fine_system_dir = os.path.join(system_dir, system_str)
-# fine_system_script = os.path.join('scripts', 'fine_system.py')
-# run_fine_system = os.path.join('scripts', 'run_system.sh')
-# rule fine_system:
-#     """Rule to optimize geometry of adsorbate on slab
-#     """
-#     input:
-#         adsorbate_pwo,
-#         slab_pwo,
-#         fine_system_script,
-#     output:
-#         os.path.join(fine_system_dir, 'espresso.pwo')
-#     conda:
-#         "envs/qe.yaml"
-#     shell:
-#         """
-#         mydir=$(pwd)
-#         mkdir -p {fine_system_dir}
-#         cp {fine_system_script} {fine_system_dir}
-#         cp {run_fine_system} {fine_system_dir}
-#         cp {adsorbate_pwo} {fine_system_dir}/adsorbate.pwo
-#         cp {slab_pwo} {fine_system_dir}
-#         cd {fine_system_dir}
-#         sbatch --job-name={system_ads}_system run_system.sh
-#         cd $mydir
-#         """
+    run with:
+    snakemake relax_slab -c1 --config metal=Cu
+    """
+    input:
+        os.path.join('scripts', 'slab', 'relax_slab.py')
+    # output:
+    #     os.path.join(slab_dir, 'espresso.pwo')
+    shell:
+        """
+        bash -c '
+        . $HOME/.bashrc # if not loaded automatically
+        conda activate /work/westgroup/harris.se/tst_env
+        python {input} {slab_dir} {lattice_constant_estimate}
+        conda deactivate'
+        """
