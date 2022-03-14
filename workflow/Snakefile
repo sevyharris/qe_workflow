@@ -66,6 +66,63 @@ rule bulk_eos_fine:
         conda deactivate'
         """
 
+rule plot_eos_coarse:
+    input:
+        os.path.join('scripts', 'bulk', 'plot_eos.py')
+    shell:
+        """
+        bash -c '
+        . $HOME/.bashrc # if not loaded automatically
+        conda activate /work/westgroup/harris.se/tst_env
+        python {input} {bulk_dir}/eos_coarse
+        conda deactivate'
+        """
+
+rule plot_eos_fine:
+    input:
+        os.path.join('scripts', 'bulk', 'plot_eos.py')
+    shell:
+        """
+        bash -c '
+        . $HOME/.bashrc # if not loaded automatically
+        conda activate /work/westgroup/harris.se/tst_env
+        python {input} {bulk_dir}/eos_fine
+        conda deactivate'
+        """
+
+rule relax_adsorbate:
+    """Rule to optimize an adsorbate
+    """
+    input:
+        os.path.join('scripts', 'bulk', 'vc_relax.py')
+    # output:
+    #     os.path.join(bulk_dir, 'vc_relax', 'espresso.pwo')
+    shell:
+        """
+        bash -c '
+        . $HOME/.bashrc # if not loaded automatically
+        conda activate /work/westgroup/harris.se/tst_env
+        python {input} {bulk_dir}
+        conda deactivate'
+        """
+
+# Call with: snakemake -c1 --config adsorbate=H2O --use-conda relax_adsorbate
+    input:
+        adsorbate_xyz,
+        adsorbate_script,
+        run_adsorbate_script,
+    shell:
+        """
+        mydir=$(pwd)
+        mkdir -p {one_ads_dir}
+        cp {adsorbate_xyz} {one_ads_dir}
+        cp {adsorbate_script} {one_ads_dir}
+        cp {run_adsorbate_script} {one_ads_dir}
+        cd {one_ads_dir}
+        sbatch --job-name={adsorbate}_ads run_adsorbate.sh
+        cd $mydir
+        """
+
 # slab_script = "scripts/relax_slab.py"
 # adsorbate_script = "scripts/relax_adsorbate.py"
 # coarse_system_script = "scripts/place_system.py"

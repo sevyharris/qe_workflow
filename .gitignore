@@ -132,3 +132,6 @@ dmypy.json
 # snakemake workflow
 results
 .snakemake
+
+# vscode
+.vscode
