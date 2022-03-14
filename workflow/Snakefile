@@ -15,9 +15,9 @@ system = '_'.join([metal, adsorbate, site])
 
 bulk_dir = os.path.join('..', 'results', 'metal', metal, 'bulk')
 slab_dir = os.path.join('..', 'results', 'metal', metal, 'slab')
-adsorbate_dir = os.path.join('..', 'results', 'adsorbate', adsorbate, 'slab')
+adsorbate_dir = os.path.join('..', 'results', 'adsorbate', adsorbate)
 system_dir = os.path.join('..', 'results', 'system', system)
-
+xyz_dir = os.path.join('..', 'resources', 'adsorbates')  # directory with adsorbate xyz files for initial guess of geometry
 
 rule vc_relax:
     """Rule to run vc-relax to get bulk lattice constant for a metal
@@ -92,36 +92,23 @@ rule plot_eos_fine:
 
 rule relax_adsorbate:
     """Rule to optimize an adsorbate
+
+    run with:
+    snakemake relax_adsorbate -c1 --config adsorbate=CO2
     """
     input:
-        os.path.join('scripts', 'bulk', 'vc_relax.py')
+        os.path.join('scripts', 'adsorbate', 'relax_ads.py')
     # output:
-    #     os.path.join(bulk_dir, 'vc_relax', 'espresso.pwo')
+    #     os.path.join(adsorbate_dir, 'espresso.pwo')
     shell:
         """
         bash -c '
         . $HOME/.bashrc # if not loaded automatically
         conda activate /work/westgroup/harris.se/tst_env
-        python {input} {bulk_dir}
+        python {input} {adsorbate_dir} {xyz_dir}
         conda deactivate'
         """
 
-# Call with: snakemake -c1 --config adsorbate=H2O --use-conda relax_adsorbate
-    input:
-        adsorbate_xyz,
-        adsorbate_script,
-        run_adsorbate_script,
-    shell:
-        """
-        mydir=$(pwd)
-        mkdir -p {one_ads_dir}
-        cp {adsorbate_xyz} {one_ads_dir}
-        cp {adsorbate_script} {one_ads_dir}
-        cp {run_adsorbate_script} {one_ads_dir}
-        cd {one_ads_dir}
-        sbatch --job-name={adsorbate}_ads run_adsorbate.sh
-        cd $mydir
-        """
 
 # slab_script = "scripts/relax_slab.py"
 # adsorbate_script = "scripts/relax_adsorbate.py"
@@ -189,45 +176,6 @@ rule relax_adsorbate:
 #         cp {run_slab_script} {slab_dir}
 #         cd {slab_dir}
 #         sbatch --job-name={metal}_slab run_slab.sh
-#         cd $mydir
-#         """
-
-# # adsorbate = "CO2"
-# # adsorbate = "CO"
-# # adsorbate = "CH4"
-# # adsorbate = "OH"
-# # adsorbate = "O2"
-# # adsorbate = "O"
-# # adsorbate = "H2"
-# # adsorbate = "H"
-# # adsorbate = "H2O"
-# # adsorbate = "C2H4"
-# try:
-#     adsorbate = config['adsorbate']
-# except KeyError:
-#     adsorbate = "N2"
-
-# adsorbate_xyz = os.path.join('..', 'resources', 'adsorbates', adsorbate + '.xyz')
-# one_ads_dir = os.path.join(adsorbate_dir, adsorbate)
-# # Call with: snakemake -c1 --config adsorbate=H2O --use-conda relax_adsorbate
-# rule relax_adsorbate:
-#     input:
-#         adsorbate_xyz,
-#         adsorbate_script,
-#         run_adsorbate_script,
-#     # output:
-#     #    os.path.join(one_ads_dir, adsorbate + '.pwo')
-#     conda:
-#         "envs/qe.yaml"
-#     shell:
-#         """
-#         mydir=$(pwd)
-#         mkdir -p {one_ads_dir}
-#         cp {adsorbate_xyz} {one_ads_dir}
-#         cp {adsorbate_script} {one_ads_dir}
-#         cp {run_adsorbate_script} {one_ads_dir}
-#         cd {one_ads_dir}
-#         sbatch --job-name={adsorbate}_ads run_adsorbate.sh
 #         cd $mydir
 #         """
 
@@ -300,51 +248,4 @@ rule relax_adsorbate:
 #         cd {fine_system_dir}
 #         sbatch --job-name={system_ads}_system run_system.sh
 #         cd $mydir
-#         """
-
-# # TODO implement this
-# adsorbates = [
-#     'CO2',
-#     'CO',
-#     'CH4',
-#     'OH',
-#     'O',
-#     'H2',
-#     'H',
-#     'H2O',
-#     'C2H4',
-#     'N2'
-# ]
-# adsorbate_xyz_dir = os.path.join('..', 'resources', 'adsorbates')
-# adsorbate_dirs = [os.path.join('..', 'results', 'adsorbate', ads) for ads in adsorbates]
-# rule relax_all_adsorbates:
-#     input:
-#         # glob.glob(os.path.join(adsorbate_xyz_dir, '*.xyz'))
-#         [os.path.join(adsorbate_xyz_dir, f'{ads}.xyz') for ads in adsorbates]
-#     # output:
-#     #    os.path.join(one_ads_dir, adsorbate + '.pwo')
-#     conda:
-#         "envs/qe.yaml"
-#     shell:
-#         """
-#         mydir=$(pwd)
-#         mkdir -p {adsorbate_dirs}
-#         #cp {input} {adsorbate_dirs}
-#         #cp {adsorbate_script} {adsorbate_dirs}
-#         #cp {run_adsorbate_script} {adsorbate_dirs}
-#         #cd {adsorbate_dirs}
-#         #sbatch --job-name={adsorbates}_ads run_adsorbate.sh
-#         #cd $mydir
-#         """
-
-
-# rule name_files:
-#     input:
-#         "../resources/adsorbates/{adsorbate_name}.xyz"
-#     # run:
-#     #    print(wildcards.adsorbate)
-#     shell:
-#         """
-#         cat {input[0]}
-#         #ls ../resources/adsorbates
 #         """
