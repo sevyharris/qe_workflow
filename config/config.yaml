@@ -18,4 +18,6 @@ slab_kpts: !!python/tuple [4,4,1]
 adsorbate_kpts: !!python/tuple [1,1,1]
 system_kpts: !!python/tuple [4,4,1]
 
-
+metal: 'Cu'
+adsorbate: 'CO2'
+site: 'top'
