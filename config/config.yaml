@@ -1,22 +1,5 @@
 ---
-# Some properties that probably belong here:
-# adsorbate vacuum size
-# system/slab vacuum size
-# force and pressure convergence thresholds
-# ecutwfc
-# ecutwfc for the bulk constant
-# kpts bulk constant
-# kpts adsorbate
-# kpts slab
-# kpts system -- should these things be the same?
-
-
-ecutwfc: 500
-ecutrho: 5000
-bulk_kpts: !!python/tuple [12,12,12]
-slab_kpts: !!python/tuple [4,4,1]
-adsorbate_kpts: !!python/tuple [1,1,1]
-system_kpts: !!python/tuple [4,4,1]
+conda_env: '/work/westgroup/harris.se/tst_env'
 
 metal: 'Cu'
 adsorbate: 'CO2'
