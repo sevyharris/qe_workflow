@@ -10,7 +10,8 @@ configfile:
 metal = config['metal']
 adsorbate = config['adsorbate']
 site = config['site']
-system = '_'.join([metal, adsorbate, site])
+facet = '111'  # eventually load this from config, but for now, only support the 111 facet
+system = '_'.join([metal + facet, adsorbate, site])
 
 
 bulk_dir = os.path.join('..', 'results', 'metal', metal, 'bulk')
@@ -109,7 +110,7 @@ rule relax_adsorbate:
         conda deactivate'
         """
 
-lattice_constant_estimate = ''  # set to a value, like 3.6 to skip eos_fine
+lattice_constant_estimate = '3.5714336744'  # set to a value, like 3.6 to skip eos_fine
 rule relax_slab:
     """Rule to optimize a metal slab
 
@@ -126,5 +127,27 @@ rule relax_slab:
         . $HOME/.bashrc # if not loaded automatically
         conda activate /work/westgroup/harris.se/tst_env
         python {input} {slab_dir} {lattice_constant_estimate}
+        conda deactivate'
+        """
+
+slab_pwo = os.path.join(slab_dir, 'espresso.pwo'),
+adsorbate_pwo = os.path.join(adsorbate_dir, 'espresso.pwo')
+rule relax_system:
+    """Rule to optimize a combined adsorbate-metal slab system
+
+    run with:
+    snakemake relax_system -c1 --config metal=Cu adsorbate=CO2
+    """
+    input:
+        os.path.join('scripts', 'system', 'relax_system.py')
+        # relax_system_script = os.path.join('scripts', 'system', 'relax_system.py')
+    # output:
+    #     os.path.join(system_dir, 'espresso.pwo')
+    shell:
+        """
+        bash -c '
+        . $HOME/.bashrc # if not loaded automatically
+        conda activate /work/westgroup/harris.se/tst_env
+        python {input} {system_dir} {slab_pwo} {adsorbate_pwo}
         conda deactivate'
         """
