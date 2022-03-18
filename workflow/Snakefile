@@ -112,7 +112,8 @@ rule relax_adsorbate:
         conda deactivate'
         """
 
-lattice_constant_estimate = '3.5714336744'  # set to a value, like 3.6 to skip eos_fine
+# do not set to a value unless you want to skip bulk_eos_fine step
+lattice_constant_estimate = ''  # set to a value, like 3.6 to skip eos_fine
 rule relax_slab:
     """Rule to optimize a metal slab
 
@@ -151,5 +152,31 @@ rule relax_system:
         . $HOME/.bashrc # if not loaded automatically
         conda activate {conda_env}
         python {input} {system_dir} {slab_pwo} {adsorbate_pwo}
+        conda deactivate'
+        """
+
+# ################# Rules for checking convergence #####################
+adsorbate_pwo = os.path.join(adsorbate_dir, 'espresso.pwo')
+rule ads_vacuum_converge:
+    input:
+        os.path.join('scripts', 'adsorbate', 'vacuum_converge.py')
+    shell:
+        """
+        bash -c '
+        . $HOME/.bashrc # if not loaded automatically
+        conda activate /work/westgroup/harris.se/tst_env
+        python {input} {adsorbate_dir} {adsorbate_pwo}
+        conda deactivate'
+        """
+
+rule ads_ecutwfc_converge:
+    input:
+        os.path.join('scripts', 'adsorbate', 'ecutwfc_converge.py')
+    shell:
+        """
+        bash -c '
+        . $HOME/.bashrc # if not loaded automatically
+        conda activate /work/westgroup/harris.se/tst_env
+        python {input} {adsorbate_dir} {adsorbate_pwo}
         conda deactivate'
         """

@@ -16,6 +16,7 @@ else:
     lattice_constant_guess = float(sys.argv[2])
 
 
+print(f'Lattice constant guess: {lattice_constant_guess}')
 # expecting a path that looks like this:
 # path/to/dft/metal/bulk
 metal = os.path.basename(os.path.dirname(bulk_dir))

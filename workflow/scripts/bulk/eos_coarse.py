@@ -18,7 +18,7 @@ if len(sys.argv) < 3:
 else:
     lattice_constant_guess = float(sys.argv[2])
 
-
+print(f'Lattice constant guess: {lattice_constant_guess}')
 # expecting a path that looks like this:
 # path/to/dft/metal/bulk
 metal = os.path.basename(os.path.dirname(bulk_dir))
@@ -30,3 +30,4 @@ adlib.bulk.eos.setup_eos_coarse(
 )
 calc_dir = os.path.join(bulk_dir, 'eos_coarse')
 adlib.bulk.eos.run_eos(calc_dir)
+
