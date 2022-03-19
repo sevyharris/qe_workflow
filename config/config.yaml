@@ -1,5 +1,5 @@
 ---
-conda_env: '/work/westgroup/harris.se/tst_env'
+adlib_env: '/work/westgroup/harris.se/tst_env'
 
 metal: 'Cu'
 adsorbate: 'CO2'

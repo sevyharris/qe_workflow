@@ -7,7 +7,7 @@ import snakemake
 configfile:
     '../config/config.yaml'
 
-conda_env = config['conda_env']
+adlib_env = config['adlib_env']
 
 metal = config['metal']
 adsorbate = config['adsorbate']
@@ -33,7 +33,7 @@ rule vc_relax:
         """
         bash -c '
         . $HOME/.bashrc # if not loaded automatically
-        conda activate {conda_env}
+        conda activate {adlib_env}
         python {input} {bulk_dir}
         conda deactivate'
         """
@@ -50,7 +50,7 @@ rule bulk_eos_coarse:
         """
         bash -c '
         . $HOME/.bashrc # if not loaded automatically
-        conda activate {conda_env}
+        conda activate {adlib_env}
         python {input} {bulk_dir}
         conda deactivate'
         """
@@ -64,7 +64,7 @@ rule bulk_eos_fine:
         """
         bash -c '
         . $HOME/.bashrc # if not loaded automatically
-        conda activate {conda_env}
+        conda activate {adlib_env}
         python {input} {bulk_dir}
         conda deactivate'
         """
@@ -76,7 +76,7 @@ rule plot_eos_coarse:
         """
         bash -c '
         . $HOME/.bashrc # if not loaded automatically
-        conda activate {conda_env}
+        conda activate {adlib_env}
         python {input} {bulk_dir}/eos_coarse
         conda deactivate'
         """
@@ -88,7 +88,7 @@ rule plot_eos_fine:
         """
         bash -c '
         . $HOME/.bashrc # if not loaded automatically
-        conda activate {conda_env}
+        conda activate {adlib_env}
         python {input} {bulk_dir}/eos_fine
         conda deactivate'
         """
@@ -107,7 +107,7 @@ rule relax_adsorbate:
         """
         bash -c '
         . $HOME/.bashrc # if not loaded automatically
-        conda activate {conda_env}
+        conda activate {adlib_env}
         python {input} {adsorbate_dir} {xyz_dir}
         conda deactivate'
         """
@@ -128,7 +128,7 @@ rule relax_slab:
         """
         bash -c '
         . $HOME/.bashrc # if not loaded automatically
-        conda activate {conda_env}
+        conda activate {adlib_env}
         python {input} {slab_dir} {lattice_constant_estimate}
         conda deactivate'
         """
@@ -150,7 +150,7 @@ rule relax_system:
         """
         bash -c '
         . $HOME/.bashrc # if not loaded automatically
-        conda activate {conda_env}
+        conda activate {adlib_env}
         python {input} {system_dir} {slab_pwo} {adsorbate_pwo}
         conda deactivate'
         """
@@ -164,7 +164,7 @@ rule ads_vacuum_converge:
         """
         bash -c '
         . $HOME/.bashrc # if not loaded automatically
-        conda activate /work/westgroup/harris.se/tst_env
+        conda activate {adlib_env}
         python {input} {adsorbate_dir} {adsorbate_pwo}
         conda deactivate'
         """
@@ -176,7 +176,7 @@ rule ads_ecutwfc_converge:
         """
         bash -c '
         . $HOME/.bashrc # if not loaded automatically
-        conda activate /work/westgroup/harris.se/tst_env
+        conda activate {adlib_env}
         python {input} {adsorbate_dir} {adsorbate_pwo}
         conda deactivate'
         """
