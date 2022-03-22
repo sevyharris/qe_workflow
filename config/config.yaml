@@ -1,5 +1,6 @@
 ---
-adlib_env: '/work/westgroup/harris.se/tst_env'
+adlib_conda_env: '/home/moon/anaconda3/envs/ase'
+adlib_cluster_env: 'SINGLE_NODE'  # other options are DISCOVERY and THETA
 
 metal: 'Cu'
 adsorbate: 'CO2'
