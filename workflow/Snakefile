@@ -154,7 +154,7 @@ rule relax_system:
         bash -c '
         . $HOME/.bashrc # if not loaded automatically
         conda activate {adlib_conda_env}
-        python {input} {system_dir} {slab_pwo} {adsorbate_pwo}
+        python {input} {system_dir} {slab_pwo} {adsorbate_pwo} {system}
         conda deactivate'
         """
 

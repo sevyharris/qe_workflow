@@ -7,6 +7,7 @@ import adlib.system.calc
 
 
 system_dir = sys.argv[1]
+
 os.makedirs(system_dir, exist_ok=True)
 if len(sys.argv) < 4:
     print('Assuming the slab.pwo and adsorbate.pwo files were already copied to the adsorbate-system directory')
@@ -16,6 +17,13 @@ else:
     shutil.copy(slab_pwo, os.path.join(system_dir, 'slab.pwo'))
     shutil.copy(adsorbate_pwo, os.path.join(system_dir, 'adsorbate.pwo'))
 
-adlib.system.calc.make_relax_script(system_dir, nproc=48)
-adlib.system.calc.make_run_relax_script(system_dir, nproc=48)
+# Pass in the job name
+if len(sys.argv) > 4:
+    job_name = sys.argv[4]
+else:
+    job_name = 'relax_system'
+
+
+adlib.system.calc.make_relax_script(system_dir, nproc=48, ecutwfc=50)
+adlib.system.calc.make_run_relax_script(system_dir, nproc=48, job_name=job_name)
 adlib.system.calc.run_relax_system(system_dir)

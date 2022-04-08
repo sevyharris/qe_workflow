@@ -25,6 +25,6 @@ print(f'Using lattice constant: {lattice_constant}')
 metal = os.path.basename(os.path.dirname(slab_dir))
 
 nproc = 48
-adlib.slab.calc.make_relax_script(slab_dir, lattice_constant, metal=metal, nproc=nproc)
+adlib.slab.calc.make_relax_script(slab_dir, lattice_constant, metal=metal, nproc=nproc, ecutwfc=50)
 adlib.slab.calc.make_run_relax_script(slab_dir, nproc=nproc)
 adlib.slab.calc.run_relax_slab(slab_dir)
