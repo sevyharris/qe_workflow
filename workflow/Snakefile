@@ -158,6 +158,21 @@ rule relax_system:
         conda deactivate'
         """
 
+
+rule vib_analysis:
+    """Rule to run vibration analysis on a combined adsorbate-metal slab system
+    """
+    input:
+        os.path.join('scripts', 'system', 'vibration_analysis.py')
+    shell:
+        """
+        bash -c '
+        . $HOME/.bashrc # if not loaded automatically
+        conda activate {adlib_conda_env}
+        python {input} {system_dir} {system}
+        conda deactivate'
+        """
+
 # ################# Rules for checking convergence #####################
 adsorbate_pwo = os.path.join(adsorbate_dir, 'espresso.pwo')
 rule ads_vacuum_converge:
