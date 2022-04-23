@@ -18,6 +18,7 @@ site = config['site']
 facet = '111'  # eventually load this from config, but for now, only support the 111 facet
 system = '_'.join([metal + facet, adsorbate, site])
 
+mixing_beta = config['mixing_beta']  # default for typical run, 'low' for difficult to converge metals like Cu, Ni
 
 bulk_dir = os.path.join('..', 'results', 'metal', metal, 'bulk')
 slab_dir = os.path.join('..', 'results', 'metal', metal, 'slab')
@@ -142,7 +143,10 @@ rule relax_system:
     """Rule to optimize a combined adsorbate-metal slab system
 
     run with:
-    snakemake relax_system -c1 --config metal=Cu adsorbate=CO2
+    snakemake relax_system -c1 --config metal=Ag adsorbate=CO2
+
+    or for metals that fail to converge
+    snakemake relax_system -c1 --config metal=Cu adsorbate=CO2 mixing_beta=low
     """
     input:
         os.path.join('scripts', 'system', 'relax_system.py')
@@ -154,7 +158,7 @@ rule relax_system:
         bash -c '
         . $HOME/.bashrc # if not loaded automatically
         conda activate {adlib_conda_env}
-        python {input} {system_dir} {slab_pwo} {adsorbate_pwo} {system}
+        python {input} {system_dir} {slab_pwo} {adsorbate_pwo} {system} {mixing_beta}
         conda deactivate'
         """
 
