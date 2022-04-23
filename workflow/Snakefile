@@ -162,9 +162,39 @@ rule relax_system:
         conda deactivate'
         """
 
+try:
+    input_geometry_file = config['input_geometry_file']
+    scf_system = 'scf_' + os.path.basename(input_geometry_file)
+except KeyError:
+    input_geometry_file = os.path.join(system_dir, 'espresso.pwo')
+    scf_system = 'scf_' + system
+
+run_scf_ecutwfc = config['run_scf_ecutwfc']
+rule run_scf:
+    """Rule to run scf energy calculation for a given geometry
+
+    run with:
+    snakemake run_scf -c1 --config metal=Ag adsorbate=CO2 run_scf_ecutwfc=60
+    snakemake run_scf -c1 --config input_geometry_file=/path/to/espresso.pwo
+    """
+    input:
+        os.path.join('scripts', 'system', 'run_scf.py')
+    shell:
+        """
+        bash -c '
+        . $HOME/.bashrc # if not loaded automatically
+        conda activate {adlib_conda_env}
+        python {input} {input_geometry_file} {run_scf_ecutwfc} {scf_system} {mixing_beta}
+        conda deactivate'
+        """
+
 
 rule vib_analysis:
+    # TODO add low mixing beta option for Cu??
     """Rule to run vibration analysis on a combined adsorbate-metal slab system
+
+    run with:
+    snakemake -c1 vib_analysis --config metal=Pt adsorbate=H
     """
     input:
         os.path.join('scripts', 'system', 'vibration_analysis.py')

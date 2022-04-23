@@ -7,3 +7,4 @@ adsorbate: 'CO2'
 site: 'top'
 
 mixing_beta: 'default'
+run_scf_ecutwfc: 60
