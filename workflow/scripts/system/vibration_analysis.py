@@ -19,6 +19,6 @@ else:
 os.makedirs(vib_dir, exist_ok=True)
 shutil.copy(os.path.join(system_dir, 'espresso.pwo'), os.path.join(vib_dir, 'system.pwo'))
 
-adlib.system.vibration.make_vib_analysis_script(vib_dir, nproc=48, ecutwfc=50)
-adlib.system.vibration.make_run_vib_analysis_script(vib_dir, nproc=48, job_name=job_name)
+adlib.system.vibration.make_vib_analysis_script(vib_dir, nproc=16, ecutwfc=50)
+adlib.system.vibration.make_run_vib_analysis_script(vib_dir, nproc=16, job_name=job_name)
 adlib.system.vibration.run_vib_analysis(vib_dir)

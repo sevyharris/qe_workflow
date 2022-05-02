@@ -17,7 +17,7 @@ import adlib.system.calc
 input_geometry_file = sys.argv[1]
 ecutwfc = sys.argv[2]
 
-calc_dir = os.path.join(os.path.dirname(input_geometry_file), f'scf_{ecutwfc}')
+calc_dir = os.path.join(os.path.dirname(input_geometry_file), f'ensemble_{ecutwfc}')
 os.makedirs(calc_dir, exist_ok=True)
 shutil.copy(input_geometry_file, os.path.join(calc_dir, 'input_geometry.pwo'))
 
@@ -25,7 +25,7 @@ shutil.copy(input_geometry_file, os.path.join(calc_dir, 'input_geometry.pwo'))
 if len(sys.argv) > 3:
     job_name = sys.argv[3]
 else:
-    job_name = 'run_scf'
+    job_name = 'run_ensemble'
 
 
 # Use low mixing_beta settings for certain metals (Cu, Ni)
@@ -35,6 +35,6 @@ if len(sys.argv) > 4:
         low_mixing_beta=True
 
 
-adlib.system.calc.make_scf_script(calc_dir, nproc=16, ecutwfc=ecutwfc, low_mixing_beta=low_mixing_beta)
+adlib.system.calc.make_scf_script(calc_dir, nproc=16, ecutwfc=ecutwfc, low_mixing_beta=low_mixing_beta, ensemble=True)
 adlib.system.calc.make_run_scf_script(calc_dir, nproc=16, job_name=job_name)
 adlib.system.calc.run_scf(calc_dir)

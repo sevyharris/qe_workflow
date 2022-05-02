@@ -19,6 +19,9 @@ facet = '111'  # eventually load this from config, but for now, only support the
 system = '_'.join([metal + facet, adsorbate, site])
 
 mixing_beta = config['mixing_beta']  # default for typical run, 'low' for difficult to converge metals like Cu, Ni
+if metal == 'Cu' or metal == 'Ni':
+    mixing_beta = 'low'    
+
 
 bulk_dir = os.path.join('..', 'results', 'metal', metal, 'bulk')
 slab_dir = os.path.join('..', 'results', 'metal', metal, 'slab')
@@ -185,6 +188,25 @@ rule run_scf:
         . $HOME/.bashrc # if not loaded automatically
         conda activate {adlib_conda_env}
         python {input} {input_geometry_file} {run_scf_ecutwfc} {scf_system} {mixing_beta}
+        conda deactivate'
+        """
+
+ensemble_system = 'e-' + scf_system
+rule run_ensemble:
+    """Rule to run ensemble scf energy calculation for a given geometry
+
+    run with:
+    snakemake run_ensemble -c1 --config metal=Ag adsorbate=CO2 run_scf_ecutwfc=60
+    snakemake run_ensemble -c1 --config input_geometry_file=/path/to/espresso.pwo
+    """
+    input:
+        os.path.join('scripts', 'system', 'run_ensemble.py')
+    shell:
+        """
+        bash -c '
+        . $HOME/.bashrc # if not loaded automatically
+        conda activate {adlib_conda_env}
+        python {input} {input_geometry_file} {run_scf_ecutwfc} {ensemble_system} {mixing_beta}
         conda deactivate'
         """
 
