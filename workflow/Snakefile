@@ -212,7 +212,6 @@ rule run_ensemble:
 
 
 rule vib_analysis:
-    # TODO add low mixing beta option for Cu??
     """Rule to run vibration analysis on a combined adsorbate-metal slab system
 
     run with:
@@ -225,7 +224,7 @@ rule vib_analysis:
         bash -c '
         . $HOME/.bashrc # if not loaded automatically
         conda activate {adlib_conda_env}
-        python {input} {system_dir} {system}
+        python {input} {system_dir} {system} {mixing_beta}
         conda deactivate'
         """
 
